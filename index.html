@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milly's Plates - Custom License Plate Frames</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #fdf7ff;
+            color: #2d1b3d;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        #canvas-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #fdf7ff 0%, #f3e8ff 25%, #fce7f3 50%, #fff1f2 75%, #fef7cd 100%);
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(253, 247, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(219, 39, 119, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ec4899, #f472b6, #fbbf24);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #2d1b3d;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: #ec4899;
+            background: linear-gradient(45deg, rgba(236, 72, 153, 0.1), rgba(244, 114, 182, 0.1));
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .section {
+            min-height: 100vh;
+            padding: 6rem 2rem 2rem;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 90vh;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ec4899, #f472b6, #fbbf24, #a78bfa, #fb7185);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.6)); }
+            to { filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.8)); }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #6b46c1;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, #ec4899, #f472b6, #fbbf24);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(236, 72, 153, 0.4);
+            background: linear-gradient(45deg, #f472b6, #fbbf24, #a78bfa);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(236, 72, 153, 0.1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(236, 72, 153, 0.2);
+            border-color: rgba(244, 114, 182, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .plate-showcase {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(45deg, #f8fafc, #e2e8f0);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .plate-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e293b;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
+            letter-spacing: 2px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ec4899;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(252, 231, 243, 0.3);
+        }
+
+        .upload-area:hover {
+            background: rgba(252, 231, 243, 0.6);
+            border-color: #f472b6;
+            transform: translateY(-2px);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ec4899;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(236, 72, 153, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #2d1b3d;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ec4899;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .mobile-menu {
+            display: none;
+            background: none;
+            border: none;
+            color: #2d1b3d;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(253, 247, 255, 0.98);
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: 0 8px 32px rgba(236, 72, 153, 0.2);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(45deg, #ec4899, #f472b6);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.3);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .section-title {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #ec4899, #f472b6, #fbbf24);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas-background"></canvas>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Milly's Plates</div>
+            <div class="nav-links">
+                <a class="nav-link" onclick="showSection('home')">Home</a>
+                <a class="nav-link" onclick="showSection('work')">Recent Work</a>
+                <a class="nav-link" onclick="showSection('custom')">Custom Design</a>
+                <a class="nav-link" onclick="showSection('contact')">Contact</a>
+            </div>
+            <button class="mobile-menu" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </nav>
+
+    <div class="notification" id="notification"></div>
+
+    <!-- Home Section -->
+    <section id="home" class="section active">
+        <div class="container">
+            <div class="hero">
+                <h1>Milly's Plates</h1>
+                <p>Custom License Plate Frames</p>
+                <button class="cta-button" onclick="showSection('custom')">Design Your Frame</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Work Section -->
+    <section id="work" class="section">
+        <div class="container">
+            <h2 class="section-title">Recent Work</h2>
+            <div class="grid" id="recent-work-grid">
+                <div class="glass-card">
+                    <div class="plate-showcase" style="background: linear-gradient(45deg, #fce7f3, #f8fafc, #fdf2f8);">
+                        <div class="plate-text" style="color: #be185d;">PRINCESS</div>
+                    </div>
+                    <h3 style="color: #ec4899;">Royal Princess Frame</h3>
+                    <p>Elegant rose gold frame with crystal accents and LED underglow lighting.</p>
+                </div>
+                <div class="glass-card">
+                    <div class="plate-showcase" style="background: linear-gradient(45deg, #fef3c7, #fef7cd, #fffbeb);">
+                        <div class="plate-text" style="color: #d97706;">GOLDEN</div>
+                    </div>
+                    <h3 style="color: #f59e0b;">Golden Goddess Frame</h3>
+                    <p>Luxurious 18k gold-plated frame with ambient honey-colored lighting.</p>
+                </div>
+                <div class="glass-card">
+                    <div class="plate-showcase" style="background: linear-gradient(45deg, #e0e7ff, #f0f9ff, #f5f3ff);">
+                        <div class="plate-text" style="color: #6366f1;">SPARKLE</div>
+                    </div>
+                    <h3 style="color: #8b5cf6;">Crystal Sparkle Frame</h3>
+                    <p>Holographic finish with Swarovski crystals and color-changing LED effects.</p>
+                </div>
+                <div class="glass-card">
+                    <div class="plate-showcase" style="background: linear-gradient(45deg, #fff1f2, #fdf2f8, #fef7ff);">
+                        <div class="plate-text" style="color: #e11d48;">ROSE VIP</div>
+                    </div>
+                    <h3 style="color: #f43f5e;">Rose Gold Luxury</h3>
+                    <p>Premium rose gold with diamond studs and personalized engraving options.</p>
+                </div>
+                <div class="glass-card">
+                    <div class="plate-showcase" style="background: linear-gradient(45deg, #ecfdf5, #f0fdf4, #dcfce7);">
+                        <div class="plate-text" style="color: #059669;">NATURE</div>
+                    </div>
+                    <h3 style="color: #10b981;">Eco Chic Frame</h3>
+                    <p>Sustainable bamboo fiber with solar-powered pastel LED strips.</p>
+                </div>
+                <div class="glass-card">
+                    <div class="plate-showcase" style="background: linear-gradient(45deg, #fef2f2, #fff5f5, #fdf2f8);">
+                        <div class="plate-text" style="color: #dc2626;">LOVE</div>
+                    </div>
+                    <h3 style="color: #ef4444;">Romance Edition</h3>
+                    <p>Heart-shaped accents with soft pink illumination and custom love messages.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom Design Section -->
+    <section id="custom" class="section">
+        <div class="container">
+            <h2 class="section-title">Custom Design Request</h2>
+            <div class="glass-card">
+                <form id="custom-form">
+                    <div class="form-group">
+                        <label for="customer-name">Your Name:</label>
+                        <input type="text" id="customer-name" name="customerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-email">Email Address:</label>
+                        <input type="email" id="customer-email" name="customerEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="plate-text">License Plate Text:</label>
+                        <input type="text" id="plate-text" name="plateText" maxlength="8" placeholder="MAX 8 CHARS">
+                    </div>
+                    <div class="form-group">
+                        <label for="frame-style">Frame Style:</label>
+                        <select id="frame-style" name="frameStyle">
+                            <option value="neon">Neon Glow</option>
+                            <option value="led">LED Integration</option>
+                            <option value="holographic">Holographic</option>
+                            <option value="carbon">Carbon Fiber</option>
+                            <option value="luxury">Luxury Gold</option>
+                            <option value="eco">Eco-Friendly</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="color-scheme">Color Scheme:</label>
+                        <input type="color" id="primary-color" name="primaryColor" value="#ec4899">
+                        <input type="color" id="secondary-color" name="secondaryColor" value="#fbbf24">
+                    </div>
+                    <div class="form-group">
+                        <label>Design Files (Images, References):</label>
+                        <div class="upload-area" id="upload-area">
+                            <p>Click here to upload files or drag and drop</p>
+                            <input type="file" id="design-files" multiple accept="image/*,.pdf,.ai,.psd" style="display: none;">
+                        </div>
+                        <div id="file-list"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="special-features">Special Features:</label>
+                        <textarea id="special-features" name="specialFeatures" rows="4" placeholder="Describe any special features you'd like (LED patterns, smart connectivity, etc.)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget">Budget Range:</label>
+                        <select id="budget" name="budget">
+                            <option value="100-250">$100 - $250</option>
+                            <option value="250-500">$250 - $500</option>
+                            <option value="500-1000">$500 - $1,000</option>
+                            <option value="1000+">$1,000+</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="cta-button" style="width: 100%;">Submit Design Request</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section">
+        <div class="container">
+            <h2 class="section-title">Contact Us</h2>
+            <div class="grid">
+                <div class="glass-card">
+                    <h3>Get in Touch</h3>
+                    <form id="contact-form">
+                        <div class="form-group">
+                            <label for="contact-name">Name:</label>
+                            <input type="text" id="contact-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Email:</label>
+                            <input type="email" id="contact-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject:</label>
+                            <input type="text" id="subject" name="subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message:</label>
+                            <textarea id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="cta-button" style="width: 100%;">Send Message</button>
+                    </form>
+                </div>
+                <div class="glass-card">
+                    <h3>Contact Information</h3>
+                    <p><strong>Email:</strong> info@millysplates.com</p>
+                    <p><strong>Phone:</strong> (555) 123-PLATE</p>
+                    <p><strong>Address:</strong> 123 Future Drive, Tech City, TC 12345</p>
+                    <p><strong>Business Hours:</strong></p>
+                    <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
+                    <p>Saturday: 10:00 AM - 4:00 PM</p>
+                    <p>Sunday: Closed</p>
+                    <br>
+                    <p><strong>Follow us on social media:</strong></p>
+                    <p>@MillysPlates on all platforms</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Canvas Background Animation
+        const canvas = document.getElementById('canvas-background');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 150;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.size = Math.random() * 4 + 2;
+                this.opacity = Math.random() * 0.8 + 0.3;
+                this.hue = Math.random() * 120 + 300; // Pink to purple range
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+                this.hue += 0.3;
+                if (this.hue > 420) this.hue = 300; // Pink to purple cycle
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 70%, 65%, ${this.opacity})`;
+                ctx.fill();
+
+                // Add soft glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = `hsla(${this.hue}, 80%, 70%, 0.6)`;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Initialize particles
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            // Draw connections between nearby particles
+            particles.forEach((particle, i) => {
+                particles.slice(i + 1).forEach(otherParticle => {
+                    const distance = Math.sqrt(
+                        Math.pow(particle.x - otherParticle.x, 2) +
+                        Math.pow(particle.y - otherParticle.y, 2)
+                    );
+
+                    if (distance < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(particle.x, particle.y);
+                        ctx.lineTo(otherParticle.x, otherParticle.y);
+                        ctx.strokeStyle = `rgba(236, 72, 153, ${0.3 - distance / 400})`;
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Navigation Functions
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Close mobile menu if open
+            document.querySelector('.nav-links').classList.remove('active');
+        }
+
+        function toggleMobileMenu() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // File Upload Handling
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('design-files');
+        const fileList = document.getElementById('file-list');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = 'rgba(0, 245, 255, 0.2)';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '';
+            fileInput.files = e.dataTransfer.files;
+            displayFiles();
+        });
+
+        fileInput.addEventListener('change', displayFiles);
+
+        function displayFiles() {
+            fileList.innerHTML = '';
+            Array.from(fileInput.files).forEach((file, index) => {
+                const fileDiv = document.createElement('div');
+                fileDiv.style.cssText = 'padding: 0.5rem; background: rgba(252,231,243,0.3); margin: 0.5rem 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(236,72,153,0.2);';
+                fileDiv.innerHTML = `
+                    <span style="color: #2d1b3d;">${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>
+                    <button onclick="removeFile(${index})" style="background: linear-gradient(45deg, #ec4899, #f472b6); border: none; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; cursor: pointer; font-size: 0.8rem;">Remove</button>
+                `;
+                fileList.appendChild(fileDiv);
+            });
+        }
+
+        function removeFile(index) {
+            const dt = new DataTransfer();
+            Array.from(fileInput.files).forEach((file, i) => {
+                if (i !== index) dt.items.add(file);
+            });
+            fileInput.files = dt.files;
+            displayFiles();
+        }
+
+        // Form Submissions
+        document.getElementById('custom-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            // Simulate API call
+            setTimeout(() => {
+                showNotification('Custom design request submitted successfully! We\'ll contact you within 24 hours.');
+                e.target.reset();
+                fileList.innerHTML = '';
+            }, 1000);
+        });
+
+        document.getElementById('contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            // Simulate API call
+            setTimeout(() => {
+                showNotification('Message sent successfully! We\'ll get back to you soon.');
+                e.target.reset();
+            }, 1000);
+        });
+
+        // Real-time plate text preview
+        document.getElementById('plate-text').addEventListener('input', (e) => {
+            const text = e.target.value.toUpperCase();
+            if (text.length > 8) {
+                e.target.value = text.slice(0, 8);
+            }
+        });
+
+        // Add smooth scrolling and entrance animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(50px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
